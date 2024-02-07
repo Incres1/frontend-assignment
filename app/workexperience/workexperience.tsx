@@ -39,7 +39,7 @@ const WorkExperience = () => {
   return (
     <div className="">
       <div className="font-medium text-center text-xl">Work Experience</div>
-      <div className="grid grid-rows-3 grid-cols-3 justify-items-center">
+      <div className="flex flex-wrap justify-center">
 
 
       
