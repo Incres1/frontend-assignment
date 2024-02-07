@@ -1,18 +1,18 @@
 "use client";
 import React, { useEffect, useState } from "react";
 
-// Function to retrieve all form keys from LocalStorage
+// Retrieve all keys from localstorage
 const getAllFormKeys = () => {
   return JSON.parse(localStorage.getItem("formKeys") || "[]");
 };
 
-// Function to retrieve form data from LocalStorage using a key
+// Retrieve data from localstorage using key
 const getFormDataByKey = (key: string) => {
   const storedData = localStorage.getItem(key);
   return storedData ? JSON.parse(storedData) : null;
 };
 
-// Function to retrieve all form data from LocalStorage
+// retrieve ALL data from localstorage
 const getAllFormData = () => {
   const allFormKeys = getAllFormKeys();
   const allFormData = allFormKeys.map((key: string) => ({
@@ -23,16 +23,15 @@ const getAllFormData = () => {
 };
 
 const WorkExperience = () => {
-  // State to store the retrieved form data
+  //state to store form data
   const [formData, setFormData] = useState<any[]>([]);
 
   useEffect(() => {
-    // Retrieve all form data from LocalStorage
     const allFormData = getAllFormData();
 
     console.log("Retrieved Form Data:", allFormData);
 
-    // Set the retrieved form data in the state
+    // set state of all form data
     setFormData(allFormData);
   }, []);
 
@@ -79,7 +78,6 @@ const WorkExperience = () => {
               <span className="font-normal">Description:</span>
               <div className="text-gray-600">{data.description}</div>
             </li>
-            {/* Add other form fields as needed */}
           </ul>
           )}
         </div>

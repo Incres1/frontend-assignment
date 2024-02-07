@@ -19,7 +19,8 @@ import { Input } from "@/components/ui/input";
 
 
 
-// 1. Define your form schema.
+// 1. Define your form schema. start date and end date are of type date but receives string and null respectively and then converts them to date.
+// Null still does not work
 const formSchema = z.object({
   companyName: z.string().min(2).max(50),
   positionTitle: z.string().min(2).max(50),
@@ -46,7 +47,7 @@ const formSchema = z.object({
 
 const DemoForm = () => {
   const [industries, setIndustries] = useState<{ id: string; name: string }[]>([]);
-  // 2. Define your form.
+  // 2. Define your form. undefined does not work
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -62,10 +63,10 @@ const DemoForm = () => {
   });
 
   useEffect(() => {
+    //fetch industries from the api, not done on backend unfortunately
     const fetchIndustries = async () => {
       const response = await fetch('https://api.staging.excelerate.dk/industries');
       const data = await response.json();
-      // Assert that each item in the data array has a 'name' property of type string
       const sortedData = data.sort((a: { name: string }, b: { name: string }) => a.name.localeCompare(b.name));
       setIndustries(sortedData);
     };
@@ -73,12 +74,12 @@ const DemoForm = () => {
     fetchIndustries();
   }, []);
 
-  // Function to save form data to LocalStorage
+  // save to local storage
 const saveFormData = (key: string, data: any) => {
   localStorage.setItem(key, JSON.stringify(data));
 };
 
-// Function to generate a unique key
+// generate key for each form submission
 const generateUniqueKey = () => {
   return `formData_${new Date().getTime()}`;
 };
@@ -93,13 +94,10 @@ function onSubmit(values: z.infer<typeof formSchema>) {
   };
 
 
-  // Generate a unique key for this form submission
   const key = generateUniqueKey();
 
-  // Save form data to LocalStorage with the generated key
+  // save to local storage
   saveFormData(key, formattedValues);
-
-  // Optionally, you can store the keys in an array for later retrieval
   const storedKeys = JSON.parse(localStorage.getItem("formKeys") || "[]");
   storedKeys.push(key);
   localStorage.setItem("formKeys", JSON.stringify(storedKeys));
@@ -201,7 +199,7 @@ function onSubmit(values: z.infer<typeof formSchema>) {
             <FormItem>
               <FormLabel>Industry<br /></FormLabel>
               <FormControl>
-                <select {...field} defaultValue="" className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50">
+                <select {...field} defaultValue="" className="flex h-10 max-h-40 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50">
                   <option value="" disabled>Select your industry</option>
                   {industries.map((industry) => (
                     <option key={industry.id} value={industry.name}>{industry.name}</option>
