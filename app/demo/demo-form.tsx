@@ -5,7 +5,6 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm, useFieldArray } from "react-hook-form";
 import { useEffect, useState } from "react";
 import * as z from "zod";
-
 import { Button } from "@/components/ui/button";
 import {
   Form,
@@ -22,7 +21,6 @@ import { Input } from "@/components/ui/input";
 
 // 1. Define your form schema.
 const formSchema = z.object({
-  username: z.string().min(2).max(50),
   companyName: z.string().min(2).max(50),
   positionTitle: z.string().min(2).max(50),
   employmentType: z.string().min(2).max(50),
@@ -34,6 +32,9 @@ const formSchema = z.object({
     return arg;
   }, z.date()),
   endDate: z.preprocess((arg) => {
+    if (arg === null || typeof arg === 'undefined') {
+      return null;
+    }
     if (typeof arg === 'string') {
       return new Date(arg);
     }
@@ -49,7 +50,6 @@ const DemoForm = () => {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      username: "",
       companyName: "",
       positionTitle: "",
       employmentType: "",
@@ -73,30 +73,43 @@ const DemoForm = () => {
     fetchIndustries();
   }, []);
 
-  // 3. Define a submit handler.
-  function onSubmit(values: z.infer<typeof formSchema>) {
-    // Do something with the form values.
-    console.log(values);
+  // Function to save form data to LocalStorage
+const saveFormData = (key: string, data: any) => {
+  localStorage.setItem(key, JSON.stringify(data));
+};
+
+// Function to generate a unique key
+const generateUniqueKey = () => {
+  return `formData_${new Date().getTime()}`;
+};
+
+function onSubmit(values: z.infer<typeof formSchema>) {
+  console.log(values);
+
+  const formattedValues = {
+    ...values,
+    startDate: values.startDate.toLocaleDateString('en-GB'),
+    endDate: values.endDate ? values.endDate.toLocaleDateString('en-GB') : null,
   };
+
+
+  // Generate a unique key for this form submission
+  const key = generateUniqueKey();
+
+  // Save form data to LocalStorage with the generated key
+  saveFormData(key, formattedValues);
+
+  // Optionally, you can store the keys in an array for later retrieval
+  const storedKeys = JSON.parse(localStorage.getItem("formKeys") || "[]");
+  storedKeys.push(key);
+  localStorage.setItem("formKeys", JSON.stringify(storedKeys));
+}
 
  
   // 4. Render the form.
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-        <FormField
-          control={form.control}
-          name="username"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Username</FormLabel>
-              <FormControl>
-                <Input placeholder="demo" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
         <FormField
           control={form.control}
           name="companyName"
@@ -186,12 +199,12 @@ const DemoForm = () => {
           name="industry"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Industry</FormLabel>
+              <FormLabel>Industry<br /></FormLabel>
               <FormControl>
-                <select {...field} defaultValue="">
+                <select {...field} defaultValue="" className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50">
                   <option value="" disabled>Select your industry</option>
                   {industries.map((industry) => (
-                    <option key={industry.id} value={industry.id}>{industry.name}</option>
+                    <option key={industry.id} value={industry.name}>{industry.name}</option>
                   ))}
                 </select>
               </FormControl>
